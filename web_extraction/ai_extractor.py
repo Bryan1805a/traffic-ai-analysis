@@ -1,17 +1,15 @@
 import os
-import google.generativeai as genai
+from google import genai
 from dotenv import load_dotenv
 
 load_dotenv()
 
-genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+client = genai.Client()
 
 def extract_location(article_text):
     if not article_text:
         return "No content"
     
-    model = genai.GenerativeModel('gemini-1.5-flash')
-
     prompt = f"""
     Bạn là một trợ lý phân tích dữ liệu giao thông tại Việt Nam.
     Hãy đọc nội dung bài báo dưới đây và tìm ra tên Tỉnh hoặc Thành phố trực thuộc trung ương nơi xảy ra tai nạn giao thông.
@@ -24,21 +22,25 @@ def extract_location(article_text):
     Nội dung bài báo:
     {article_text}
     """
-
+    
     try:
-        response = model.generate_content(prompt)
-
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+        )
+        
         location = response.text.strip()
         return location
-    
+        
     except Exception as e:
         print(f"Error while calling Gemini API: {e}")
         return "Error"
 
+# Test
 if __name__ == "__main__":
     sample_text = "Vào khoảng 15h chiều nay, một vụ va chạm liên hoàn giữa 3 xe tải đã xảy ra trên tuyến quốc lộ 1A đoạn qua địa bàn huyện Trảng Bom, tỉnh Đồng Nai khiến giao thông ùn tắc kéo dài..."
-
-    print("Waiting Gemini analysing the location...")
+    
+    print("Waiting Gemini extract location from the article...")
     result = extract_location(sample_text)
-
-    print(f"Extraction Results: '{result}'")
+    
+    print(f"Extraction result: '{result}'")
