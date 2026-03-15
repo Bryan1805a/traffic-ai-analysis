@@ -1,8 +1,9 @@
 import sqlite3
 import os
 
-os.makedirs("../data", exist_ok=True)
-DB_PATH = "../data/traffic_accident_data.db"
+DATA_DIR = os.path.join(os.path.dirname(__file__), "../data")
+os.makedirs(DATA_DIR, exist_ok=True)
+DB_PATH = os.path.join(DATA_DIR, "traffic_accident_data.db")
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)
