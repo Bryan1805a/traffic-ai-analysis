@@ -1,7 +1,7 @@
 import sys
 import time
 from scraper import scrape_article
-from ai_extractor import extract_location
+from ai_extractor import extract_accident_info
 from geocoder import get_coordinates
 from database import init_db, save_record
 
@@ -19,14 +19,19 @@ def process_traffic_article(url):
     print(f"The number of characters obtained is: {len(article_text)}")
     print("-" * 40)
 
-    print("[State 2] AI is extracting location...")
-    location = extract_location(article_text)
+    print("[State 2] AI is extracting JSON data...")
+    info = extract_accident_info(article_text)
 
-    if location in ["Unknown", "Error"]:
+    if not info or info.get("location") in ["Unknown", "Error", None]:
         print("Location not clearly identified. Processing stopped.")
         return
 
-    print(f"LOCATION: {location}")
+    location = info["location"]
+    deaths = info.get("deaths", 0)
+    injuries = info.get("injuries", 0)
+    vehicles = info.get("vehicles", "Unclear")
+
+    print(f"Location: {location} | Deaths: {deaths} | Injuries: {injuries} | Vehicle: {vehicles}")
     print("-" * 40)
 
     print("[State 3] Translating place names to GPS coordinates...")
@@ -36,7 +41,7 @@ def process_traffic_article(url):
         print(f"Coordinates obtained: Latitude {lat}, Longitude {lon}")
         print("-" * 40)
         print("[STATE 4] Saving to database...")
-        save_record(url, location, lat, lon)
+        save_record(url, location, lat, lon, deaths, injuries, vehicles)
     else:
         print("Error: Coordinates not found. Skip archiving.")
     
