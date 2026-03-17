@@ -15,7 +15,10 @@ def init_db():
                    url TEXT UNIQUE,
                    location TEXT,
                    latitude REAL,
-                   longitude REAL
+                   longitude REAL,
+                   deaths INTEGER,
+                   injuries INTEGER,
+                   vehicles TEXT
         )
 ''')
     
@@ -23,17 +26,21 @@ def init_db():
     conn.close()
     print("Database has been successfully checked/initialized.")
 
-def save_record(url, location, lat, lon):
+def save_record(url, location, lat, lon, deaths, injuries, vehicles):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
     try:
         cursor.execute('''
-            INSERT INTO accidents (url, location, latitude, longitude)
-            VALUES (?, ?, ?, ?)
-''', (url, location, lat, lon))
+            INSERT INTO accidents (url, location, latitude, longitude, deaths, injuries, vehicles)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+''', (url, location, lat, lon, deaths, injuries, vehicles))
         conn.commit()
-        print(f"Successfully saved to the database: {location} ({lat}, {lon})")
+        print("SUCCESSFULLY SAVED TO DATABASE.")
+        print(f"Location: {location} ({lat}, {lon})")
+        print(f"Deaths: {deaths}")
+        print(f"Injuries: {injuries}")
+        print(f"Vehicles: {vehicles}")
     except sqlite3.IntegrityError:
         print("WARNING: This article already exists in the database, skip archiving.")
     finally:
